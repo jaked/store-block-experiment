@@ -1,9 +1,17 @@
+import React from "react";
 import { FileBlockProps, getLanguageFromFilename } from "@githubnext/blocks";
 import { Button, Box } from "@primer/react";
 import "./index.css";
 
 export default function (props: FileBlockProps) {
-  const { context, content, metadata, onUpdateMetadata } = props;
+  const { context, content, onStoreGet, onStoreSet } = props;
+  const [number, setNumber] = React.useState(0);
+  React.useEffect(() => {
+    onStoreGet(`${context.path}/number`).then((number) =>
+      setNumber(number ?? 0)
+    );
+  }, []);
+
   const language = Boolean(context.path)
     ? getLanguageFromFilename(context.path)
     : "N/A";
@@ -29,11 +37,12 @@ export default function (props: FileBlockProps) {
         <Box p={4}>
           <p>Metadata example: this button has been clicked:</p>
           <Button
-            onClick={() =>
-              onUpdateMetadata({ number: (metadata.number || 0) + 1 })
-            }
+            onClick={() => {
+              setNumber(number + 1);
+              onStoreSet(`${context.path}/number`, number + 1);
+            }}
           >
-            {metadata.number || 0} times
+            {number} times
           </Button>
           <pre className="mt-3 p-3">{content}</pre>
         </Box>
